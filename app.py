@@ -82,6 +82,10 @@ def create_student():
 
                     return jsonify({'error': 'Age is required'}), 400
 
+                if data.get('age') <= 0:
+
+                    return jsonify({'error': 'Age must be a positive integer'}), 400
+
                 #Validate joined_date
 
                 if not data.get('joined_date'):
@@ -133,39 +137,6 @@ def create_student():
                 db.session.rollback()
 
                 return jsonify({'error': str(e)}), 400
-                
-
-           
-
-                new_student = Student(
-
-                full_name=data['full_name'],
-
-                email=data['email'],
-
-                age=data['age'],
-
-                cgpa=data.get('cgpa', 0.0),
-
-                is_active=data.get('is_active', True),
-
-                joined_date=data['joined_date']
-
-                )
-
-                db.session.add(new_student)
-
-                db.session.commit()
-
-                return jsonify({'message': 'Student created successfully!'}), 201
-
-    
-
-            except Exception as e:
-
-                db.session.rollback()
-
-                return jsonify({'error': str(e)}), 400
 
 #Get all students
 
@@ -173,13 +144,61 @@ def create_student():
 
 def get_students():
 
-    students = Student.query.all()
+    try:
 
-    student_list = []
+        students = Student.query.all()
 
-    for student in students:
+        if not students:
 
-        student_list.append({
+            return jsonify({'message': 'No students found'}), 404
+
+        student_list = []
+
+        for student in students:
+
+            student_list.append({
+
+              'id': student.id,
+
+                'full_name': student.full_name,
+
+                'email': student.email,
+
+                'age': student.age,
+
+                'cgpa': student.cgpa,
+
+                'is_active': student.is_active,
+
+                'joined_date': student.joined_date.strftime('%Y-%m-%d'),
+
+                'created_at': student.created_at.strftime('%Y-%m-%d')
+
+            })
+
+        return jsonify(student_list),201
+
+    except Exception as e:
+
+        return jsonify({'error': str(e)}), 400
+
+    
+
+#Get student by ID
+
+@app.route('/api/students/<int:id>', methods=['GET'])
+
+def get_student(id):
+
+    try:
+
+        student = Student.query.get(id)
+
+        if not student:
+
+            return jsonify({'error': 'Student not found'}), 404
+
+        return jsonify({
 
             'id': student.id,
 
@@ -197,43 +216,11 @@ def get_students():
 
             'created_at': student.created_at.strftime('%Y-%m-%d')
 
-        })
-
-    return jsonify(student_list)
-
-#Get student by ID
-
-@app.route('/api/students/<int:id>', methods=['GET'])
-
-def get_student(id):
-
-    
-
-    student = Student.query.get(id)
-
-    if not student:
-
-        return jsonify({'error': 'Student not found'}), 404
-
-    return jsonify({
-
-        'id': student.id,
-
-        'full_name': student.full_name,
-
-        'email': student.email,
-
-        'age': student.age,
-
-        'cgpa': student.cgpa,
-
-        'is_active': student.is_active,
-
-        'joined_date': student.joined_date.strftime('%Y-%m-%d'),
-
-        'created_at': student.created_at.strftime('%Y-%m-%d')
-
     })
+
+    except Exception as e:
+
+        return jsonify({'error': str(e)}), 400
 
 #Update student by ID
 
@@ -241,21 +228,29 @@ def get_student(id):
 
 def update_student(id):
 
-    student = Student.query.get(id)
-
-    if not student:
-
-        return jsonify({'error': 'Student not found'}), 404
-
-    data = request.get_json()
-
-    if not data:
-
-        return jsonify({'error': 'No data provided'}), 400
-
-   
-
     try:
+
+        student = Student.query.get(id)
+
+        data = request.get_json()
+
+        if not data:
+
+            return jsonify({'error': 'No data provided'}), 400
+
+        if data.get('age') <= 0:
+
+            return jsonify({'error': 'Age must be a positive integer'}), 400
+
+        #Check duplicate email
+
+        if data.get('email'):
+
+            existing_email = Student.query.filter_by(email=data['email']).first()
+
+            if existing_email and existing_email.id != id:
+
+                return jsonify({'error': 'Email already exists'}), 400
 
         student.full_name = data.get('full_name',student.full_name)
 
@@ -278,36 +273,34 @@ def update_student(id):
         db.session.rollback()
 
         return jsonify({'error': str(e)}), 400
-    
-    #Delete student by ID
+
+#Delete student by ID
 
 @app.route('/api/students/<int:id>', methods=['DELETE'])
 
 def delete_student(id):
 
-    student = Student.query.get(id)
-
-    if not student:
-
-        return jsonify({'error': 'Student not found'}), 404
-
     try:
+
+        student = Student.query.get(id)
+
+        if not student:
+
+           return jsonify({'error': 'Student not found'}), 404
+
+  
 
         db.session.delete(student)
 
         db.session.commit()
 
-        return jsonify({'message': 'Student deleted successfully!'})
+        return jsonify({'message': f'Student ID {id} deleted successfully!'})
 
     except Exception as e:
 
         db.session.rollback()
 
         return jsonify({'error': str(e)}), 400
-
- 
-
- 
 
 if __name__ == '__main__':
 
@@ -336,8 +329,3 @@ if __name__ == '__main__':
         print(f"Error connecting to database: {e}")
 
     app.run(debug=True)
-
-
-
-
-
