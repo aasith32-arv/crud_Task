@@ -301,6 +301,37 @@ def delete_student(id):
         db.session.rollback()
 
         return jsonify({'error': str(e)}), 400
+    
+
+
+
+
+    #Course Model
+
+class Course(db.Model):
+
+  __tablename__ = 'courses'
+
+  id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+  course_title = db.Column(db.String(100), nullable=False,unique=True)
+
+  course_fee = db.Column(db.Float, nullable=False)
+
+  duration_months = db.Column(db.Integer, nullable=False)
+
+  description = db.Column(db.Text)
+
+  is_available = db.Column(db.Boolean, default=True)
+
+  created_at=db.Column(db.DateTime, default=datetime.utcnow())
+
+
+
+
+
+
+  
 
 if __name__ == '__main__':
 
