@@ -201,12 +201,32 @@ def update_student(id):
         db.session.rollback()
 
         return jsonify({'error': str(e)}), 400
+    
+    #Delete student by ID
 
- 
+@app.route('/api/students/<int:id>', methods=['DELETE'])
 
- 
+def delete_student(id):
 
- 
+    student = Student.query.get(id)
+
+    if not student:
+
+        return jsonify({'error': 'Student not found'}), 404
+
+    try:
+
+        db.session.delete(student)
+
+        db.session.commit()
+
+        return jsonify({'message': 'Student deleted successfully!'})
+
+    except Exception as e:
+
+        db.session.rollback()
+
+        return jsonify({'error': str(e)}), 400
 
  
 
