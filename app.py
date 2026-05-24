@@ -1,9 +1,11 @@
 from flask import Flask 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root123@localhost/crud'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root123@localhost/uki_school'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -15,4 +17,15 @@ def home():
 
 
 if __name__ == '__main__':
-  app.run(debug=True)
+    try:
+       with app.app_context():
+           db.session.execute(text('SELECT 1'))
+           print("Database Connection Successful!")
+           db.create_all()
+
+    except Exception as e:
+        print(f"Error connetion to database :{e}")
+
+
+
+    app.run(debug=True)
