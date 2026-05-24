@@ -10,6 +10,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+class Student(db.Model):
+    # __tablename__='students'
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    cgpa = db.Column(db.Float, nullable=False, default=0.0)
+    is_active = db.Column(db.Boolean, default=True)
+    join_date = db.Column(db.Date, nullable=False)
+    create_at = db.Cloumn(db.DateTime, default=db.func.current_timestamp())
 
 @app.route("/")
 def home():
