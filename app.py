@@ -52,13 +52,90 @@ def home():
 
 def create_student():
 
-            data = request.get_json()
-
-            if not data:
-
-                return jsonify({'error': 'No data provided'}), 400
-
             try:
+
+                data = request.get_json()
+
+#Validate required fields:
+
+                #Check if data is provided
+
+                if not data:
+
+                    return jsonify({'error': 'No data provided'}), 400
+
+                #Validate full_name
+
+                if not data.get('full_name'):
+
+                    return jsonify({'error': 'Full name is required'}), 400
+
+                #Validate email
+
+                if not data.get('email'):
+
+                    return jsonify({'error': 'Email is required'}), 400
+
+                #Validate age
+
+                if not data.get('age'):
+
+                    return jsonify({'error': 'Age is required'}), 400
+
+                #Validate joined_date
+
+                if not data.get('joined_date'):
+
+                    return jsonify({'error': 'Joined date is required'}), 400
+
+                #Validate cgpa
+
+                if not data.get('cgpa'):
+
+                    return jsonify({'error': 'CGPA is required'}), 400
+
+                #Check duplicate email
+
+                existing_email = Student.query.filter_by(email=data['email']).first()
+
+                if existing_email:  
+
+                    return jsonify({'error': 'Email already exists'}), 400
+
+              
+
+                new_student = Student(
+
+                full_name=data['full_name'],
+
+                email=data['email'],
+
+                age=data['age'],
+
+                cgpa=data.get('cgpa', 0.0),
+
+                is_active=data.get('is_active', True),
+
+                joined_date=data['joined_date']
+
+                )
+
+                db.session.add(new_student)
+
+                db.session.commit()
+
+                return jsonify({'message': 'Student created successfully!'}), 201
+
+    
+
+            except Exception as e:
+
+                db.session.rollback()
+
+                return jsonify({'error': str(e)}), 400
+                
+
+           
 
                 new_student = Student(
 
