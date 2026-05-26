@@ -1,6 +1,6 @@
 from flask import jsonify, request
-from app import db
-from app.models.course import Course
+from app.config import db
+from app.models.course_model import Course
  
  
 def create_course():

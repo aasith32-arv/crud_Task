@@ -1,5 +1,5 @@
 from datetime import datetime
-from app import db
+from app.config import db
  
 class Student(db.Model):
     __tablename__ = 'students'
@@ -22,6 +22,6 @@ class Student(db.Model):
             'cgpa':        self.cgpa,
             'is_active':   self.is_active,
             'joined_date': self.joined_date.strftime('%Y-%m-%d'),
-            'created_at':  self.created_at.strftime('%Y-%m-%d'),
+            'created_at':  self.created_at.strftime('%Y-%m-%d') if self.created_at else None,
         }
  

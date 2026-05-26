@@ -1,7 +1,15 @@
+from datetime import datetime
 
 from flask import jsonify, request
-from app import db
-from app.models.student import Student
+
+from app.config import db
+from app.models.student_model import Student
+
+
+def _parse_date(value):
+    if isinstance(value, str):
+        return datetime.strptime(value, '%Y-%m-%d').date()
+    return value
  
  
 def create_student():
@@ -32,7 +40,7 @@ def create_student():
             age=data['age'],
             cgpa=data.get('cgpa', 0.0),
             is_active=data.get('is_active', True),
-            joined_date=data['joined_date'],
+            joined_date=_parse_date(data['joined_date']),
         )
         db.session.add(student)
         db.session.commit()
@@ -86,7 +94,8 @@ def update_student(id):
         student.age         = data.get('age', student.age)
         student.cgpa        = data.get('cgpa', student.cgpa)
         student.is_active   = data.get('is_active', student.is_active)
-        student.joined_date = data.get('joined_date', student.joined_date)
+        if data.get('joined_date') is not None:
+            student.joined_date = _parse_date(data['joined_date'])
  
         db.session.commit()
         return jsonify({'message': 'Student updated successfully!'}), 200
